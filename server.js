@@ -9,6 +9,8 @@ const objectID = require('mongodb').ObjectID
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
+const port = 5000
+
 
 //routes
 
@@ -117,8 +119,8 @@ mongoose.connect(config.db, {
 })
 .then(() => {
     console.log('connected to MongoDB')
-    app.listen(5000, ()=> {
-        console.log(`Node API app is running on port 5000`)
+    app.listen(process.env.PORT || port, ()=> {
+        console.log(`Node API app is running on port ${port}`)
     });
 }).catch((error) => {
     console.log(error)
