@@ -12,6 +12,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
 const port = 5000
+let isSent = false
 
 // Configure Nodemailer with your email service provider details
 const transporter = nodemailer.createTransport({
@@ -116,23 +117,29 @@ app.put('/microcontroller/equipments', async(req, res) => {
         if(!product){
             return res.status(404).json({message: `cannot find any equipment with name ${req.body.name}`})
         }
-        const mailOptions = {
-            from: 'CeeCeeHackers@alert.com',
-            to: 'ceeceehackers@gmail.com',
-            subject: 'Temperature Alert',
-            text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}`,
-          };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              console.log(error);
-              console.log("error sending mail");
-            } else {
-              console.log('Email sent: ' + info.response);
-            }
-          });
-
-        // const updatedProduct = await Product.findById(id);
+        if(req.body.temperature > 38 && !isSent)
+        {
+            console.log
+            const mailOptions = {
+                from: 'CeeCeeHackers@alert.com',
+                to: 'ceeceehackers@gmail.com',
+                subject: 'Temperature Alert',
+                text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}`,
+              };
+    
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                  console.log(error);
+                  console.log("error sending mail");
+                  isSent = true
+                } else {
+                  console.log('Email sent: ' + info.response);
+                }
+              });
+        }
+        else{
+            isSent = false
+        }
         res.status(200).json(product);
         
     } catch (error) {
