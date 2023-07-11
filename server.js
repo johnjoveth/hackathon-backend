@@ -2,7 +2,9 @@ const express = require('express')
 const mongoose = require('mongoose')
 
 const Equipment = require('./models/equipmentModel')
+const Manual = require('./models/manualModel')
 const config = require('./config/config')
+const nodemailer = require('nodemailer');
 const app = express()
 const objectID = require('mongodb').ObjectID
 
@@ -11,6 +13,14 @@ app.use(express.urlencoded({extended: false}))
 
 const port = 5000
 
+// Configure Nodemailer with your email service provider details
+const transporter = nodemailer.createTransport({
+    service: 'your_email_service_provider',
+    auth: {
+      user: 'ceeceehackers@gmail.com',
+      pass: 'ceeceehackers12345',
+    },
+  });
 
 //routes
 
@@ -85,6 +95,10 @@ app.delete('/equipments/:id', async(req, res) =>{
         if(!product){
             return res.status(404).json({message: `cannot find any equip with ID ${req.params.id}`})
         }
+        if(req.body.temperature > 38)
+        {
+            
+        }
         res.status(200).json(product);
         
     } catch (error) {
@@ -102,6 +116,22 @@ app.put('/microcontroller/equipments', async(req, res) => {
         if(!product){
             return res.status(404).json({message: `cannot find any equipment with name ${req.body.name}`})
         }
+        const mailOptions = {
+            from: 'CeeCeeHackers@alert.com',
+            to: 'ceeceehackers@gmail.com',
+            subject: 'Temperature Alert',
+            text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}`,
+          };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+              console.log(error);
+              console.log("error sending mail");
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+
         // const updatedProduct = await Product.findById(id);
         res.status(200).json(product);
         
@@ -110,6 +140,47 @@ app.put('/microcontroller/equipments', async(req, res) => {
     }
 
 });
+
+//Update manuals post
+app.post('/manual', async(req, res) => {
+    try {
+        const product = await Manual.create(req.body)
+        res.status(200).json(product);
+        
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({message: error.message})
+    }
+})
+
+//manuals get all
+app.get('/manual', async(req, res) => {
+    try {
+        const products = await Manual.find({});
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+})
+
+//manuals get one via name
+// app.get('/manual', async(req, res) => {
+//     try {
+//         const {name} = req.body.name;
+//         console.log(name)
+//         const product = await Equipment.findOneAndUpdate(name, req.body, { new: true});
+//         // we cannot find any product in database
+//         if(!product){
+//             return res.status(404).json({message: `cannot find any equipment with name ${req.body.name}`})
+//         }
+//         // const updatedProduct = await Product.findById(id);
+//         res.status(200).json(product);
+        
+//     } catch (error) {
+//         res.status(500).json({message: error.message})
+//     }
+
+// });
 
 //set upp server and db
 mongoose.set("strictQuery", false)
