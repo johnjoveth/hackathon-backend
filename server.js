@@ -13,18 +13,20 @@ app.use(express.urlencoded({extended: false}))
 
 const port = 5000
 let isSent = false
+let recentTemp = 30.0
+
 
 // Configure Nodemailer with your email service provider details
-const transporter = nodemailer.createTransport({
+const configEmail = {
     service: 'gmail',
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
     auth: {
         user: 'ceeceehackers@gmail.com',
-        pass: 'ceeceehackers12345',
-      }
-  });
+        pass: 'fwipnyqrokolvlmo',
+      },
+  };
 
 //routes
 
@@ -120,29 +122,34 @@ app.put('/microcontroller/equipments', async(req, res) => {
         if(!product){
             return res.status(404).json({message: `cannot find any equipment with name ${req.body.name}`})
         }
-        if(req.body.temperature > 38 && !isSent)
+        if(req.body.temperature > 38)
         {
-            console.log
-            const mailOptions = {
-                from: 'CeeCeeHackers@alert.com',
-                to: 'ceeceehackers@gmail.com',
-                subject: 'Temperature Alert',
-                text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}`,
-              };
-    
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                  console.log(error);
-                  console.log("error sending mail");
-                  isSent = true
-                } else {
-                  console.log('Email sent: ' + info.response);
-                }
-              });
+            if(!isSent || (recentTemp + 1) < req.body.temperature)
+            {
+                const mailOptions = {
+                    from: 'CeeCeeHackers@alert.com',
+                    to: 'ceeceehackers@gmail.com',
+                    subject: 'Temperature Alert',
+                    text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}`,
+                  };
+                const transporter = nodemailer.createTransport(configEmail);
+                transporter.sendMail(mailOptions, (err, info) => {
+                    if(err){
+                        console.log(err);
+                    }
+                    else{
+                        console.log(info.response);
+                        isSent = true;
+                        recentTemp = req.body.temperature;
+                    }
+                })
+            }
+            
         }
         else{
             isSent = false
         }
+        
         res.status(200).json(product);
         
     } catch (error) {
@@ -173,26 +180,6 @@ app.get('/manual', async(req, res) => {
     }
 })
 
-//manuals get one via name
-// app.get('/manual', async(req, res) => {
-//     try {
-//         const {name} = req.body.name;
-//         console.log(name)
-//         const product = await Equipment.findOneAndUpdate(name, req.body, { new: true});
-//         // we cannot find any product in database
-//         if(!product){
-//             return res.status(404).json({message: `cannot find any equipment with name ${req.body.name}`})
-//         }
-//         // const updatedProduct = await Product.findById(id);
-//         res.status(200).json(product);
-        
-//     } catch (error) {
-//         res.status(500).json({message: error.message})
-//     }
-
-// });
-
-//set upp server and db
 mongoose.set("strictQuery", false)
 mongoose.connect(config.db, {
     useNewUrlParser: true,
