@@ -124,8 +124,8 @@ app.put('/microcontroller/equipments', async(req, res) => {
         }
         if(req.body.temperature > 38)
         {
-            if(!isSent || (recentTemp + 1) < req.body.temperature)
-            {
+            if(!isSent || ((recentTemp + 1) < req.body.temperature) || ((recentTemp - 1) > req.body.temperature))
+            { 
                 const mailOptions = {
                     from: 'CeeCeeHackers@alert.com',
                     to: 'ceeceehackers@gmail.com',
