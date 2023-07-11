@@ -16,11 +16,14 @@ let isSent = false
 
 // Configure Nodemailer with your email service provider details
 const transporter = nodemailer.createTransport({
-    service: 'your_email_service_provider',
+    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
-      user: 'ceeceehackers@gmail.com',
-      pass: 'ceeceehackers12345',
-    },
+        user: 'ceeceehackers@gmail.com',
+        pass: 'ceeceehackers12345',
+      }
   });
 
 //routes
