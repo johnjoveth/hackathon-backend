@@ -5,7 +5,8 @@ const Equipment = require('./models/equipmentModel')
 const Manual = require('./models/manualModel')
 const config = require('./config/config')
 const nodemailer = require('nodemailer');
-const client = require('twilio')('AC3530e532382c9c98e5f5801c043aee87', 'ff635bc499d4bb41589db75505dd6a88');
+const client = require('twilio')('AC3530e532382c9c98e5f5801c043aee87', '9b734b623dc5b04df42a2493493cde41');
+
 const app = express()
 const objectID = require('mongodb').ObjectID
 
@@ -125,7 +126,7 @@ app.put('/microcontroller/equipments', async(req, res) => {
         if(!product){
             return res.status(404).json({message: `cannot find any equipment with name ${req.body.name}`})
         }
-        if(req.body.temperature > 30)
+        if(req.body.temperature > 38)
         {
             if(!isSent || ((recentTemp + 1) < req.body.temperature) || ((recentTemp - 1) > req.body.temperature))
             { 
@@ -151,19 +152,26 @@ app.put('/microcontroller/equipments', async(req, res) => {
 
                 //for calling
 
-                if(req.body.temperature > 35)
+                if(req.body.temperature > 40)
                 {
                     if(!isCalled || ((recentCallTemp + 2) < req.body.temperature) || ((recentCallTemp - 2) > req.body.temperature))
                     {
-                        isCalled = true
+                        
                         client.calls.create({
                             url: 'http://demo.twilio.com/docs/voice.xml', // TwiML URL for call instructions
                             to: '+639567715776',
                             from: '+12343243158',
+                            // from: '+15005550006',
                           })
-                          .then(call => console.log('Phone call initiated:', call.sid))
+                          .then(call => {
+                                        console.log('Phone call initiated:', call.sid);
+                                        isCalled = true
+                                        recentCallTemp = req.body.temperature;
+                                    })
                           .catch(error => console.log('Error making phone call:', error));
-                          recentCallTemp = req.body.temperature;
+
+                        
+                          
                     }
                     
                 }
