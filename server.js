@@ -5,6 +5,7 @@ const Equipment = require('./models/equipmentModel')
 const Manual = require('./models/manualModel')
 const config = require('./config/config')
 const nodemailer = require('nodemailer');
+const client = require('twilio')('AC3530e532382c9c98e5f5801c043aee87', 'ff635bc499d4bb41589db75505dd6a88');
 const app = express()
 const objectID = require('mongodb').ObjectID
 
@@ -13,7 +14,9 @@ app.use(express.urlencoded({extended: false}))
 
 const port = 5000
 let isSent = false
+let isCalled = false
 let recentTemp = 30.0
+let recentCallTemp = 35.0
 
 
 // Configure Nodemailer with your email service provider details
@@ -122,13 +125,15 @@ app.put('/microcontroller/equipments', async(req, res) => {
         if(!product){
             return res.status(404).json({message: `cannot find any equipment with name ${req.body.name}`})
         }
-        if(req.body.temperature > 38)
+        if(req.body.temperature > 30)
         {
             if(!isSent || ((recentTemp + 1) < req.body.temperature) || ((recentTemp - 1) > req.body.temperature))
             { 
+
+                //for sending email
                 const mailOptions = {
                     from: 'CeeCeeHackers@alert.com',
-                    to: 'ceeceehackers@gmail.com',
+                    to: 'john.joveth.r.flores@accenture.com',
                     subject: 'Temperature Alert',
                     text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}`,
                   };
@@ -143,6 +148,32 @@ app.put('/microcontroller/equipments', async(req, res) => {
                         recentTemp = req.body.temperature;
                     }
                 })
+
+                //for calling
+
+                if(req.body.temperature > 35)
+                {
+                    if(!isCalled || ((recentCallTemp + 2) < req.body.temperature) || ((recentCallTemp - 2) > req.body.temperature))
+                    {
+                        isCalled = true
+                        client.calls.create({
+                            url: 'http://demo.twilio.com/docs/voice.xml', // TwiML URL for call instructions
+                            to: '+639567715776',
+                            from: '+12343243158',
+                          })
+                          .then(call => console.log('Phone call initiated:', call.sid))
+                          .catch(error => console.log('Error making phone call:', error));
+                          recentCallTemp = req.body.temperature;
+                    }
+                    
+                }
+                else
+                {
+                    if(req.body.temperature < 38 )
+                    {
+                        isCalled = false
+                    }
+                }
             }
             
         }
