@@ -5,7 +5,7 @@ const Equipment = require('./models/equipmentModel')
 const Manual = require('./models/manualModel')
 const config = require('./config/config')
 const nodemailer = require('nodemailer');
-const client = require('twilio')('AC3530e532382c9c98e5f5801c043aee87', '9b734b623dc5b04df42a2493493cde41');
+const client = require('twilio')(process.env.SID, process.env.TOKEN);
 
 const app = express()
 const objectID = require('mongodb').ObjectID
