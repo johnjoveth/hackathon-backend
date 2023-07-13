@@ -136,7 +136,12 @@ app.put('/microcontroller/equipments', async(req, res) => {
                     from: 'CeeCeeHackers@alert.com',
                     to: 'john.joveth.r.flores@accenture.com',
                     subject: 'Temperature Alert',
-                    text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}`,
+                    text: `The temperature has exceeded the threshold. Current temperature: ${req.body.temperature}°C while the humidity is ${req.body.humid}
+                    Work Order 1120128 has been created`,
+                    html: `<p>The temperature has exceeded the threshold. Current temperature: <span style="color:red;">${req.body.temperature} </span>°C while the humidity is ${req.body.humid} </p> </br>
+                    <p>Work Order 1120128 has been created </p>
+                    
+                    <p><a href="https://prod.as9.com">https://prod.as9.com</a></p>`
                   };
                 const transporter = nodemailer.createTransport(configEmail);
                 transporter.sendMail(mailOptions, (err, info) => {
