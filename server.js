@@ -162,8 +162,8 @@ app.put('/microcontroller/equipments', async(req, res) => {
 
                 if(req.body.temperature > 40)
                 {
-                    if(!isCalled || ((recentCallTemp + 2) < req.body.temperature) || ((recentCallTemp - 2) > req.body.temperature))
-                    {
+                    // if(!isCalled || ((recentCallTemp + 2) < req.body.temperature) || ((recentCallTemp - 2) > req.body.temperature))
+                    // {
                         
                         client.calls.create({
                             url: 'http://demo.twilio.com/docs/voice.xml', // TwiML URL for call instructions
@@ -180,7 +180,7 @@ app.put('/microcontroller/equipments', async(req, res) => {
 
                         
                           
-                    }
+                    // }
                     
                 }
                 else
